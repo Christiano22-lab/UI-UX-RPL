@@ -108,6 +108,19 @@
             font-size: 42px;
             font-weight: 700;
             margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .hero-section h2::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -10px;
+            width: 120px;
+            height: 3px;
+            background: #4FC3F7;
         }
 
         .hero-section p {

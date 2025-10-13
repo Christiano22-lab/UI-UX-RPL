@@ -1057,7 +1057,7 @@
 
     <script>
         // Global state
-        let isLoggedIn = true; // Set to true since we're bypassing login
+        let isLoggedIn = true; // Simplified demo state
 
         // Navigation
         document.querySelectorAll('.nav-item').forEach(item => {
@@ -1206,6 +1206,26 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Dashboard Admin BPS NTT initialized');
         });
+
+        // Logout implementation
+        function logout() {
+            // Clear any stored auth/session (if any used later)
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                document.cookie.split(';').forEach(function(c) {
+                    document.cookie = c
+                        .replace(/^ +/, '')
+                        .replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
+                });
+            } catch (e) {}
+
+            isLoggedIn = false;
+            showNotification('Anda telah logout.', 'success');
+            setTimeout(() => {
+                window.location.href = 'masuk.html';
+            }, 600);
+        }
     </script>
 </body>
 </html>
