@@ -142,6 +142,15 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
+        .info-card {
+            background: white;
+            border: 3px solid #4FC3F7;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            margin-top: 20px;
+        }
+
         .form-group {
             margin-bottom: 25px;
         }
@@ -384,6 +393,7 @@
                     <button type="submit" class="btn btn-submit">Kirim</button>
                 </div>
             </form>
+            <div id="feedbackInfo" class="info-card" style="display:none;"></div>
         </div>
     </section>
 
@@ -428,9 +438,31 @@
     </footer>
 
     <script>
+        // Persist feedback to localStorage and show confirmation
         document.getElementById('feedbackForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Terima kasih! Feedback Anda telah berhasil dikirim.');
+            const email = document.getElementById('email').value.trim();
+            const nama = document.getElementById('nama').value.trim();
+            const instansi = document.getElementById('instansi').value.trim();
+            const pengalaman = document.getElementById('pengalaman').value.trim();
+
+            const entry = {
+                id: 'fb_' + Date.now(),
+                email,
+                nama,
+                instansi,
+                pengalaman,
+                tanggal: new Date().toISOString()
+            };
+
+            const existing = JSON.parse(localStorage.getItem('feedbackEntries') || '[]');
+            existing.push(entry);
+            localStorage.setItem('feedbackEntries', JSON.stringify(existing));
+
+            const info = document.getElementById('feedbackInfo');
+            info.style.display = 'block';
+            info.innerHTML = `<strong>Terima kasih, ${nama}!</strong><br/>Feedback Anda telah tersimpan.`;
+
             this.reset();
         });
     </script>

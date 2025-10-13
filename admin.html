@@ -595,6 +595,12 @@
                     </svg>
                     Monitoring Aktivitas
                 </div>
+                <div class="nav-item" data-page="feedback">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M18 10c0 3.866-3.582 7-8 7a8.87 8.87 0 01-3.955-.93L2 17l.93-4.045A8.87 8.87 0 012 10c0-3.866 3.582-7 8-7s8 3.134 8 7z"/>
+                    </svg>
+                    Rekap Feedback
+                </div>
             </nav>
             <div class="sidebar-footer">
                 <div style="color: #B0C4DE; font-size: 12px; text-align: center;">
@@ -923,6 +929,30 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Feedback Recap Page -->
+                <div id="feedbackPage" class="page-section">
+                    <div class="content-card">
+                        <h3>Rekap Feedback Pengguna</h3>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" onclick="refreshFeedback()">Refresh</button>
+                            <button class="btn btn-primary" onclick="exportFeedback()">Export CSV</button>
+                        </div>
+                        <table class="data-table" id="feedbackTable">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Nama</th>
+                                    <th>Email</th>
+                                    <th>Instansi</th>
+                                    <th>Feedback</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1075,7 +1105,8 @@
                     'data': 'Kelola Data',
                     'visualization': 'Konfigurasi Visualisasi',
                     'users': 'Kelola Akun',
-                    'monitoring': 'Monitoring Aktivitas'
+                    'monitoring': 'Monitoring Aktivitas',
+                    'feedback': 'Rekap Feedback'
                 };
                 document.getElementById('pageTitle').textContent = titles[pageName];
 
@@ -1205,7 +1236,63 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Dashboard Admin BPS NTT initialized');
+            refreshFeedback();
         });
+
+        function refreshFeedback() {
+            const tbody = document.querySelector('#feedbackTable tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const entries = JSON.parse(localStorage.getItem('feedbackEntries') || '[]')
+                .sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
+            if (entries.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 5;
+                cell.textContent = 'Belum ada feedback.';
+                row.appendChild(cell);
+                tbody.appendChild(row);
+                return;
+            }
+            entries.forEach(e => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(e.tanggal).toLocaleString('id-ID')}</td>
+                    <td>${escapeHtml(e.nama)}</td>
+                    <td>${escapeHtml(e.email)}</td>
+                    <td>${escapeHtml(e.instansi)}</td>
+                    <td>${escapeHtml(e.pengalaman)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function exportFeedback() {
+            const entries = JSON.parse(localStorage.getItem('feedbackEntries') || '[]');
+            const header = ['Tanggal','Nama','Email','Instansi','Feedback'];
+            const rows = entries.map(e => [e.tanggal, e.nama, e.email, e.instansi, e.pengalaman]);
+            const csv = [header, ...rows].map(r => r.map(csvEscape).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'rekap-feedback.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function csvEscape(value) {
+            const v = String(value ?? '').replaceAll('"', '""');
+            if (v.includes(',') || v.includes('\n') || v.includes('"')) {
+                return '"' + v + '"';
+            }
+            return v;
+        }
+
+        function escapeHtml(str) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return String(str ?? '').replace(/[&<>"']/g, m => map[m]);
+        }
 
         // Logout implementation
         function logout() {
