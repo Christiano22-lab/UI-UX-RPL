@@ -59,6 +59,7 @@
         }
 
         .logo img[src=""] { display: none; }
+        .logo img:not([src=""]) + .logo-placeholder { display: none; }
 
         .header-text h1 {
             color: white;
